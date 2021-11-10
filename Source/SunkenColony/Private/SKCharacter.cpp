@@ -1,18 +1,14 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "SunkenColonyCharacter.h"
-#include "HeadMountedDisplayFunctionLibrary.h"
+
+#include "SKCharacter.h"
+
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
-//////////////////////////////////////////////////////////////////////////
-// ASunkenColonyCharacter
-
-ASunkenColonyCharacter::ASunkenColonyCharacter()
+ASKCharacter::ASKCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -50,38 +46,40 @@ ASunkenColonyCharacter::ASunkenColonyCharacter()
 //////////////////////////////////////////////////////////////////////////
 // Input
 
-void ASunkenColonyCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void ASKCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &ASunkenColonyCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ASunkenColonyCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveForward", this, &ASKCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ASKCharacter::MoveRight);
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &ASunkenColonyCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("TurnRate", this, &ASKCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &ASunkenColonyCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &ASKCharacter::LookUpAtRate);
 }
 
-void ASunkenColonyCharacter::TurnAtRate(float Rate)
+void ASKCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
-void ASunkenColonyCharacter::LookUpAtRate(float Rate)
+void ASKCharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void ASunkenColonyCharacter::MoveForward(float Value)
+void ASKCharacter::MoveForward(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
@@ -95,7 +93,7 @@ void ASunkenColonyCharacter::MoveForward(float Value)
 	}
 }
 
-void ASunkenColonyCharacter::MoveRight(float Value)
+void ASKCharacter::MoveRight(float Value)
 {
 	if ( (Controller != nullptr) && (Value != 0.0f) )
 	{
@@ -109,3 +107,5 @@ void ASunkenColonyCharacter::MoveRight(float Value)
 		AddMovementInput(Direction, Value);
 	}
 }
+
+
