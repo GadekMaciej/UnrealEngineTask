@@ -3,24 +3,52 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/RotatingMovementComponent.h"
 #include "SKCollectibleBase.generated.h"
 
-UCLASS()
+class USceneComponent;
+class UStaticMeshComponent;
+class UShphereComponent;
+class URotatingMovementComponent;
+class USoundBase;
+
+// Base class for any sort of power ups and coins
+UCLASS(Abstract)
 class SUNKENCOLONY_API ASKCollectibleBase : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ASKCollectibleBase();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	USceneComponent* SceneComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UStaticMeshComponent* StaticMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	USphereComponent* SphereCollider;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	URotatingMovementComponent* RotatingMovementComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Assets")
+	USoundBase* OnCollectSound;
+
+	// Override this event to add custom logic to collectible
+	UFUNCTION(BlueprintImplementableEvent, Category="Events")
+	void OnCollected();
+	
+	// calls OnCollected() Event;
+	UFUNCTION()
+	void OnSphereColliderOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };

@@ -81,7 +81,6 @@ void ASKCharacter::HandleDeath()
 			{
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSoundEffect, Location);
 			}
-			//GetMesh()->SetVisibility(false);
 
 			// call restart game
 			ASKEndlessRunnerGM* GM = Cast<ASKEndlessRunnerGM>(UGameplayStatics::GetGameMode(World));
