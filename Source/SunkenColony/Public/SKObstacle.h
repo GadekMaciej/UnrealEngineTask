@@ -9,7 +9,7 @@
 class USceneComponent;
 class UStaticMeshComponent;
 
-UCLASS()
+UCLASS(Abstract)
 class SUNKENCOLONY_API ASKObstacle : public AActor
 {
 	GENERATED_BODY()

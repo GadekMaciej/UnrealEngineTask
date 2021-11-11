@@ -16,21 +16,37 @@ void ASKEndlessRunnerGM::CreateInitialFloorTiles()
 	GetLaneCoordinates();
 	for (int i = 0; i < NumOfInitFloorTiles-1; i++)
 	{
-		AddFloorTile();
+		AddFloorTile(true);
 	}
 	UE_LOG(SunkenColony, Log, TEXT("Created Initial Tiles"));
 }
 
-ASKTileBase* ASKEndlessRunnerGM::AddFloorTile()
+ASKTileBase* ASKEndlessRunnerGM::AddFloorTile(const bool bUseDefaultFloorTile)
 {
 	ASKTileBase* NewTile = nullptr;
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		NewTile = World->SpawnActor<ASKTileBase>(DefaultTileClass, NextTileSpawnPoint);
-		if (NewTile)
+		if (bUseDefaultFloorTile)
 		{
-			NextTileSpawnPoint = NewTile->GetNextTileAttachTransform();
+			
+			NewTile = World->SpawnActor<ASKTileBase>(DefaultTileClass);
+			if (NewTile)
+			{				
+				FVector NewLocation = NextTileSpawnPoint.GetTranslation() + NewTile->PreviousTileAttachPoint->GetRelativeLocation().GetAbs();
+				NewTile->SetActorLocation(NewLocation);
+				NextTileSpawnPoint = NewTile->GetNextTileAttachTransform();
+			}
+		}
+		else
+		{
+			NewTile = World->SpawnActor<ASKTileBase>(RandomizeTileType());
+			if (NewTile)
+			{
+				FVector NewLocation = NextTileSpawnPoint.GetTranslation() + NewTile->PreviousTileAttachPoint->GetRelativeLocation().GetAbs();
+				NewTile->SetActorLocation(NewLocation);
+				NextTileSpawnPoint = NewTile->GetNextTileAttachTransform();
+			}
 		}
 	}
 	return NewTile;
@@ -44,7 +60,7 @@ void ASKEndlessRunnerGM::BeginPlay()
 
 void ASKEndlessRunnerGM::GetLaneCoordinates()
 {
-	ASKTileBase* NewTile = AddFloorTile();
+	ASKTileBase* NewTile = AddFloorTile(true);
 	if (NewTile)
 	{
 		LaneLocationsOffset.Add(NewTile->LaneA->GetComponentLocation().Y);
@@ -60,4 +76,10 @@ void ASKEndlessRunnerGM::GetLaneCoordinates()
 	{
 		UE_LOG(SunkenColony, Log, TEXT("Could not determine lanes coordinates, make sure class tile is selected inside GameMode"))
 	}
+}
+
+TSubclassOf<ASKTileBase> ASKEndlessRunnerGM::RandomizeTileType()
+{
+	const int32 RandomIndex = FMath::RandRange(0, TypesOfTilesGenerated.Num()-1);
+	return TypesOfTilesGenerated[RandomIndex];
 }

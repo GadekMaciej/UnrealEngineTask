@@ -17,10 +17,14 @@ ASKTileBase::ASKTileBase()
 
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Default Root Component"));
 	RootComponent = SceneComponent;
+	
 	FloorStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Floor Static Mesh"));
 	FloorStaticMesh->SetupAttachment(SceneComponent);
+	
 	NextTileAttachPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Next Tile Attach Point"));
 	NextTileAttachPoint->SetupAttachment(SceneComponent);
+	PreviousTileAttachPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Previous Tile Attach Point"));
+	PreviousTileAttachPoint->SetupAttachment(SceneComponent);
 
 	LaneA = CreateDefaultSubobject<UArrowComponent>(TEXT("Left Lane"));
 	LaneA->SetupAttachment(SceneComponent);
@@ -35,7 +39,6 @@ ASKTileBase::ASKTileBase()
 	CollisionBoxEnd = CreateDefaultSubobject<UBoxComponent>("Collision box end");
 	CollisionBoxEnd->SetupAttachment(SceneComponent);
 	CollisionBoxEnd->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
-	
 }
 
 void ASKTileBase::OnEnteringTile_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
