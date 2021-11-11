@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "SKCharacter.generated.h"
 
+class UParticleSystem;
+class USoundBase;
+
 UCLASS(Abstract)
 class SUNKENCOLONY_API ASKCharacter : public ACharacter
 {
@@ -26,9 +29,24 @@ public:
 	int32 CurrentLane = 1;
 	
 	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category="Movement | Lane")
-	int32 NextLane = 0; 
+	int32 NextLane = 0;
+
+	UPROPERTY(VisibleInstanceOnly, Category="Debug")
+	bool bIsDead = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Assets")
+	UParticleSystem* DeathParticleSystem;
 	
-	UFUNCTION(BlueprintImplementableEvent, Category="Movement | Lane")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Assets")
+	USoundBase* DeathSoundEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Assets")
+	UParticleSystem* LaneSwitchParticleSystem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Assets")
+	USoundBase* LaneSwitchSoundEffect;
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Movement | Lane")
 	void ChangeLane();
 
 	UFUNCTION(BlueprintCallable, Category="Movement | Lane")
@@ -36,43 +54,23 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Movement | Lane")
 	void ChangeLaneFinished();
-	
-	UFUNCTION()
+
+	// Late on move functions should probably be merged into 1 function
+	UFUNCTION(BlueprintCallable, Category="Movement")
 	void MoveRight();
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Movement")
 	void MoveLeft();
+
+	UFUNCTION(BlueprintCallable)
+	void HandleDeath();
+	
+	UFUNCTION(BlueprintCallable)
+	void HandleHitDanger();
 
 	// Sets default values for this character's properties
 	ASKCharacter();
-
-	// /** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	// float BaseTurnRate;
-	//
-	// /** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	// float BaseLookUpRate;
-
-	protected:
-	// /** Called for forwards/backward input */
-	// void MoveForward(float Value);
-	//
-	// /** Called for side to side input */
-	// void MoveRight(float Value);
-	//
-	// /** 
-	// * Called via input to turn at a given rate. 
-	// * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	// */
-	// void TurnAtRate(float Rate);
-	//
-	// /**
-	// * Called via input to turn look up/down at a given rate. 
-	// * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	// */
-	// void LookUpAtRate(float Rate);
-
+	
 	protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

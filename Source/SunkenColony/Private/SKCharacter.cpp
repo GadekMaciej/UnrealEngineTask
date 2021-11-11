@@ -13,10 +13,25 @@
 void ASKCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	FRotator ControlRotator = GetControlRotation();
-	ControlRotator.Roll = 0.0f;
-	ControlRotator.Pitch = 0.0f;
-	AddMovementInput(ControlRotator.Vector());
+	if(!bIsDead)
+	{
+		FRotator ControlRotator = GetControlRotation();
+		ControlRotator.Roll = 0.0f;
+		ControlRotator.Pitch = 0.0f;
+		AddMovementInput(ControlRotator.Vector());
+	}
+}
+
+void ASKCharacter::ChangeLane_Implementation()
+{
+	if (LaneSwitchParticleSystem)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LaneSwitchParticleSystem, GetActorLocation());
+	}
+	if (LaneSwitchSoundEffect)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), LaneSwitchSoundEffect, GetActorLocation());
+	}
 }
 
 void ASKCharacter::ChangeLaneUpdate(const float Value)
@@ -45,6 +60,39 @@ void ASKCharacter::MoveLeft()
 {
 	NextLane = FMath::Clamp(CurrentLane - 1, 0, 2);
 	ChangeLane();
+}
+
+void ASKCharacter::HandleDeath()
+{
+	if (!bIsDead)
+	{
+		bIsDead = true;
+		GetMesh()->SetSimulatePhysics(true);
+		DisableInput(nullptr);
+		const FVector Location = GetActorLocation();
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			if(DeathParticleSystem)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathParticleSystem, Location);
+			}
+			if(DeathSoundEffect)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSoundEffect, Location);
+			}
+			//GetMesh()->SetVisibility(false);
+
+			// call restart game
+			ASKEndlessRunnerGM* GM = Cast<ASKEndlessRunnerGM>(UGameplayStatics::GetGameMode(World));
+			World->GetTimerManager().SetTimer(GM->LevelRestartTimerHandle, GM, &ASKEndlessRunnerGM::HandleGameOver, GM->GameOverLingerTimer);
+		} 
+	}
+}
+
+void ASKCharacter::HandleHitDanger()
+{
+	HandleDeath();
 }
 
 ASKCharacter::ASKCharacter()

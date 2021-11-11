@@ -3,6 +3,7 @@
 
 #include "SKEndlessRunnerGM.h"
 #include "SKTileBase.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "SunkenColony/SunkenColony.h"
 
 ASKEndlessRunnerGM::ASKEndlessRunnerGM()
@@ -10,7 +11,7 @@ ASKEndlessRunnerGM::ASKEndlessRunnerGM()
 	
 }
 
-void ASKEndlessRunnerGM::CreateInitialFloorTiles()
+void ASKEndlessRunnerGM::CreateInitialFloorTiles_Implementation()
 {
 	// this function creates 1 additional tile, just something to fix later
 	GetLaneCoordinates();
@@ -50,6 +51,15 @@ ASKTileBase* ASKEndlessRunnerGM::AddFloorTile(const bool bUseDefaultFloorTile)
 		}
 	}
 	return NewTile;
+}
+
+void ASKEndlessRunnerGM::HandleGameOver_Implementation()
+{
+	if (LevelRestartTimerHandle.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(LevelRestartTimerHandle);
+	}
+	UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("RestartLevel"));
 }
 
 void ASKEndlessRunnerGM::BeginPlay()
