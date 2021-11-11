@@ -20,35 +20,58 @@ class SUNKENCOLONY_API ASKCharacter : public ACharacter
 	class UCameraComponent* FollowCamera;
 	
 public:
+	virtual void Tick(float DeltaSeconds) override;
+
+	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category="Movement | Lane")
+	int32 CurrentLane = 1;
+	
+	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category="Movement | Lane")
+	int32 NextLane = 0; 
+	
+	UFUNCTION(BlueprintImplementableEvent, Category="Movement | Lane")
+	void ChangeLane();
+
+	UFUNCTION(BlueprintCallable, Category="Movement | Lane")
+	void ChangeLaneUpdate(float Value);
+
+	UFUNCTION(BlueprintCallable, Category="Movement | Lane")
+	void ChangeLaneFinished();
+	
+	UFUNCTION()
+	void MoveRight();
+	
+	UFUNCTION()
+	void MoveLeft();
+
 	// Sets default values for this character's properties
 	ASKCharacter();
 
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseTurnRate;
-
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseLookUpRate;
+	// /** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	// float BaseTurnRate;
+	//
+	// /** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	// float BaseLookUpRate;
 
 	protected:
-	/** Called for forwards/backward input */
-	void MoveForward(float Value);
-
-	/** Called for side to side input */
-	void MoveRight(float Value);
-
-	/** 
-	* Called via input to turn at a given rate. 
-	* @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	*/
-	void TurnAtRate(float Rate);
-
-	/**
-	* Called via input to turn look up/down at a given rate. 
-	* @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	*/
-	void LookUpAtRate(float Rate);
+	// /** Called for forwards/backward input */
+	// void MoveForward(float Value);
+	//
+	// /** Called for side to side input */
+	// void MoveRight(float Value);
+	//
+	// /** 
+	// * Called via input to turn at a given rate. 
+	// * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
+	// */
+	// void TurnAtRate(float Rate);
+	//
+	// /**
+	// * Called via input to turn look up/down at a given rate. 
+	// * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
+	// */
+	// void LookUpAtRate(float Rate);
 
 	protected:
 	// APawn interface

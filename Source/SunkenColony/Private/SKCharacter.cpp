@@ -3,19 +3,55 @@
 
 #include "SKCharacter.h"
 
+#include "SKEndlessRunnerGM.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
+
+void ASKCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	FRotator ControlRotator = GetControlRotation();
+	ControlRotator.Roll = 0.0f;
+	ControlRotator.Pitch = 0.0f;
+	AddMovementInput(ControlRotator.Vector());
+}
+
+void ASKCharacter::ChangeLaneUpdate(const float Value)
+{
+	FVector CharacterLocation = GetCapsuleComponent()->GetComponentLocation();
+	ASKEndlessRunnerGM* GM = Cast<ASKEndlessRunnerGM>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (GM)
+	{
+		CharacterLocation.Y = FMath::Lerp(GM->LaneLocationsOffset[CurrentLane], GM->LaneLocationsOffset[NextLane], Value);
+		SetActorLocation(CharacterLocation);
+	}
+}
+
+void ASKCharacter::ChangeLaneFinished()
+{
+	CurrentLane = NextLane;
+}
+
+void ASKCharacter::MoveRight()
+{
+	NextLane = FMath::Clamp(CurrentLane + 1, 0, 2);
+	ChangeLane();
+}
+
+void ASKCharacter::MoveLeft()
+{
+	NextLane = FMath::Clamp(CurrentLane - 1, 0, 2);
+	ChangeLane();
+}
 
 ASKCharacter::ASKCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-
-	// set our turn rates for input
-	BaseTurnRate = 45.f;
-	BaseLookUpRate = 45.f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -52,60 +88,13 @@ void ASKCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputC
 	
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
+	PlayerInputComponent->BindAction("MoveLeft", IE_Pressed, this, &ASKCharacter::MoveLeft);
+	PlayerInputComponent->BindAction("MoveRight", IE_Pressed, this, &ASKCharacter::MoveRight);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &ASKCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ASKCharacter::MoveRight);
-
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &ASKCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &ASKCharacter::LookUpAtRate);
-}
-
-void ASKCharacter::TurnAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void ASKCharacter::LookUpAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
-}
-
-void ASKCharacter::MoveForward(float Value)
-{
-	if ((Controller != nullptr) && (Value != 0.0f))
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
-	}
-}
-
-void ASKCharacter::MoveRight(float Value)
-{
-	if ( (Controller != nullptr) && (Value != 0.0f) )
-	{
-		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
 	
-		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
-		AddMovementInput(Direction, Value);
-	}
 }
+
+
 
 
