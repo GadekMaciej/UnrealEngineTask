@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SKCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/RotatingMovementComponent.h"
 #include "SKCollectibleBase.generated.h"
@@ -35,18 +37,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	URotatingMovementComponent* RotatingMovementComponent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Assets")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Assets")
 	USoundBase* OnCollectSound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="settings")
+	int32 ScoreValue;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Settings")
 	float HeightDifferenceRequiredForJumpedOn = 50.0f;
-
+	
 	// called when player collects this collectible
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="Events")
-	void OnCollected();
+	void OnCollected(ASKCharacter* PlayerCharacter);
 	// called when player jumps on top of this collectible
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="Events")
-	void OnJumpedOnTop();
+	void OnJumpedOnTop(ASKCharacter* PlayerCharacter);
 	
 	// calls OnCollected() Event;
 	UFUNCTION()

@@ -34,10 +34,10 @@ void ASKCollectibleBase::OnSphereColliderOverlap(UPrimitiveComponent* Overlapped
 	if(Character)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OnCollectSound, GetActorLocation());
-		OnCollected();
+		OnCollected(Character);
 		if(GetActorLocation().Z + HeightDifferenceRequiredForJumpedOn < OtherActor->GetActorLocation().Z)
 		{
-			OnJumpedOnTop();
+			OnJumpedOnTop(Character);
 		}
 		Destroy();
 	}

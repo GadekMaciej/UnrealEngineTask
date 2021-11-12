@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "SKCharacter.generated.h"
 
@@ -30,6 +31,12 @@ public:
 	
 	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category="Movement | Lane")
 	int32 NextLane = 0;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement | Lane")
+	float DefaultLaneSwitchSpeedMultiplier = 1.0f;
+	
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadWrite, Category="Movement | Lane")
+	float CurrentLaneSwitchSpeedMultiplier = 1.0f;
 
 	UPROPERTY(VisibleInstanceOnly, Category="Debug")
 	bool bIsDead = false;
