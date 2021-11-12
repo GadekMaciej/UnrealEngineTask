@@ -38,9 +38,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Assets")
 	USoundBase* OnCollectSound;
 
-	// Override this event to add custom logic to collectible
-	UFUNCTION(BlueprintImplementableEvent, Category="Events")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Settings")
+	float HeightDifferenceRequiredForJumpedOn = 50.0f;
+
+	// called when player collects this collectible
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="Events")
 	void OnCollected();
+	// called when player jumps on top of this collectible
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="Events")
+	void OnJumpedOnTop();
 	
 	// calls OnCollected() Event;
 	UFUNCTION()

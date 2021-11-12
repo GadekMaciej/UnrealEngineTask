@@ -5,6 +5,7 @@
 
 #include "SKCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "SunkenColony/SunkenColony.h"
 
 // Sets default values
 ASKCollectibleBase::ASKCollectibleBase()
@@ -34,6 +35,10 @@ void ASKCollectibleBase::OnSphereColliderOverlap(UPrimitiveComponent* Overlapped
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OnCollectSound, GetActorLocation());
 		OnCollected();
+		if(GetActorLocation().Z + HeightDifferenceRequiredForJumpedOn < OtherActor->GetActorLocation().Z)
+		{
+			OnJumpedOnTop();
+		}
 		Destroy();
 	}
 }

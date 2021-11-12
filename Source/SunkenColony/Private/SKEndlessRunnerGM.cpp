@@ -93,3 +93,9 @@ TSubclassOf<ASKTileBase> ASKEndlessRunnerGM::RandomizeTileType()
 	const int32 RandomIndex = FMath::RandRange(0, TypesOfTilesGenerated.Num()-1);
 	return TypesOfTilesGenerated[RandomIndex];
 }
+
+void ASKEndlessRunnerGM::ModifyPlayerScore(int32 Value)
+{
+	PlayerScore += Value;
+	PlayerScoreChanged.Broadcast(PlayerScore, Value);
+}

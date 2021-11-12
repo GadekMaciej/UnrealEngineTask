@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "SKEndlessRunnerGM.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FPlayerScoreChanged, int32, NewScore, int32, ScoreChange);
+
 class ASKTileBase;
 /**
  * 
@@ -19,15 +21,15 @@ public:
 	ASKEndlessRunnerGM();
 
 	// Initial floor tiles are blank. There are no obstacles nor powerups.
-	UPROPERTY(EditDefaultsOnly, Category="EndlessRunner | Tiles")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="EndlessRunner | Tiles")
 	int32 NumOfInitFloorTiles = 8;
 	
 	// Time until tile is completely destroyed, starts after character passes tile end.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="EndlessRunner | Tiles")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="EndlessRunner | Tiles")
 	float TileLingerTime = 4.0f;
 
 	// Tile class that will be used as initial tiles.
-	UPROPERTY(EditDefaultsOnly, Category="EndlessRunner | Tiles")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="EndlessRunner | Tiles")
 	TSubclassOf<ASKTileBase> DefaultTileClass;
 	
 	// An Array of tile classes that will be generated in endless loop. For now they all have the same priority.
@@ -40,11 +42,16 @@ public:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="EndlessRunner | Debug")
 	TArray<float> LaneLocationsOffset;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="EndlessRunner | Game")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="EndlessRunner | Game")
 	// Time That the game will wait after player lost all lifes.
 	float GameOverLingerTimer = 4.0f;
 
-	UPROPERTY()
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, Category="EndlessRunner | Game")
+	int32 PlayerScore = 0;
+
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FPlayerScoreChanged PlayerScoreChanged;
+	
 	FTimerHandle LevelRestartTimerHandle;
 	
 	UFUNCTION(BlueprintNativeEvent, Category="Tiles")
@@ -55,6 +62,9 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category="Game")
 	void HandleGameOver();
+
+	UFUNCTION(BlueprintCallable, Category="Game")
+	void ModifyPlayerScore(int32 Value);
 
 	protected:
 	virtual void BeginPlay() override;
