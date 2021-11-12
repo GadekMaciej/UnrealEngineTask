@@ -26,7 +26,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	USceneComponent* SceneComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
 	UStaticMeshComponent* StaticMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
@@ -35,7 +35,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	URotatingMovementComponent* RotatingMovementComponent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Assets")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Assets")
 	USoundBase* OnCollectSound;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Settings")
