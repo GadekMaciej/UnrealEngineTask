@@ -6,7 +6,7 @@
 #include "GameFramework/Character.h"
 #include "SunkenColonyCharacter.generated.h"
 
-UCLASS(config=Game)
+UCLASS(config=Game, Abstract)
 class ASunkenColonyCharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -30,10 +30,6 @@ public:
 	float BaseLookUpRate;
 
 protected:
-
-	/** Resets HMD orientation in VR. */
-	void OnResetVR();
-
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 
@@ -51,12 +47,6 @@ protected:
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	 */
 	void LookUpAtRate(float Rate);
-
-	/** Handler for when a touch input begins. */
-	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
-
-	/** Handler for when a touch input stops. */
-	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
 protected:
 	// APawn interface

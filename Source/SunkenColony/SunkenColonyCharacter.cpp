@@ -67,35 +67,6 @@ void ASunkenColonyCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAxis("TurnRate", this, &ASunkenColonyCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ASunkenColonyCharacter::LookUpAtRate);
-
-	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &ASunkenColonyCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &ASunkenColonyCharacter::TouchStopped);
-
-	// VR headset functionality
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ASunkenColonyCharacter::OnResetVR);
-}
-
-
-void ASunkenColonyCharacter::OnResetVR()
-{
-	// If SunkenColony is added to a project via 'Add Feature' in the Unreal Editor the dependency on HeadMountedDisplay in SunkenColony.Build.cs is not automatically propagated
-	// and a linker error will result.
-	// You will need to either:
-	//		Add "HeadMountedDisplay" to [YourProject].Build.cs PublicDependencyModuleNames in order to build successfully (appropriate if supporting VR).
-	// or:
-	//		Comment or delete the call to ResetOrientationAndPosition below (appropriate if not supporting VR)
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
-}
-
-void ASunkenColonyCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
-{
-		Jump();
-}
-
-void ASunkenColonyCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
-{
-		StopJumping();
 }
 
 void ASunkenColonyCharacter::TurnAtRate(float Rate)

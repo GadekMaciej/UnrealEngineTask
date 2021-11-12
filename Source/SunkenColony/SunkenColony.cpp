@@ -4,4 +4,6 @@
 #include "Modules/ModuleManager.h"
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, SunkenColony, "SunkenColony" );
+
+DEFINE_LOG_CATEGORY(SunkenColony);
  
