@@ -38,7 +38,7 @@ public:
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadWrite, Category="Movement | Lane")
 	float CurrentLaneSwitchSpeedMultiplier = 1.0f;
 
-	UPROPERTY(VisibleInstanceOnly, Category="Debug")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Debug")
 	bool bIsDead = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Assets")
@@ -68,6 +68,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	void MoveLeft();
+	
+	virtual void Jump() override;
+	
+	virtual void StopJumping() override;
 
 	UFUNCTION(BlueprintCallable)
 	void HandleDeath();

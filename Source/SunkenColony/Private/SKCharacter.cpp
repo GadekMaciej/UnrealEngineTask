@@ -13,7 +13,7 @@
 void ASKCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if(!bIsDead)
+	if (!bIsDead)
 	{
 		FRotator ControlRotator = GetControlRotation();
 		ControlRotator.Roll = 0.0f;
@@ -62,13 +62,29 @@ void ASKCharacter::MoveLeft()
 	ChangeLane();
 }
 
+void ASKCharacter::Jump()
+{
+	if (!bIsDead)
+	{
+		Super::Jump();
+	}
+}
+
+void ASKCharacter::StopJumping()
+{
+	if (!bIsDead)
+	{
+		Super::StopJumping();
+	}
+}
+
 void ASKCharacter::HandleDeath()
 {
 	if (!bIsDead)
 	{
 		bIsDead = true;
 		GetMesh()->SetSimulatePhysics(true);
-		DisableInput(nullptr);
+		DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 		const FVector Location = GetActorLocation();
 		UWorld* World = GetWorld();
 		if (World)
@@ -137,8 +153,8 @@ void ASKCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputC
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("MoveLeft", IE_Pressed, this, &ASKCharacter::MoveLeft);
 	PlayerInputComponent->BindAction("MoveRight", IE_Pressed, this, &ASKCharacter::MoveRight);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASKCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ASKCharacter::StopJumping);
 	
 }
 
