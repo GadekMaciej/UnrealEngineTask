@@ -34,6 +34,7 @@ class SUNKENCOLONY_API USKAttributeSet : public UAttributeSet
 		float NewMaxValue,
 		const FGameplayAttribute& EffectedAttributeProperty) const;
 
+	// health attributes
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category="Attributes")
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS(USKAttributeSet, Health);
@@ -42,9 +43,39 @@ class SUNKENCOLONY_API USKAttributeSet : public UAttributeSet
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(USKAttributeSet, MaxHealth);
 
+	// Movement speed attributes
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MoveSpeed, Category="Attributes")
+	FGameplayAttributeData MoveSpeed;
+	ATTRIBUTE_ACCESSORS(USKAttributeSet, MoveSpeed);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMoveSpeed, Category="Attributes")
+	FGameplayAttributeData MaxMoveSpeed;
+	ATTRIBUTE_ACCESSORS(USKAttributeSet, MaxMoveSpeed);
+
+	// Lane switch speed multiplier Attributes
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_LaneSwitchSpeed, Category="Attributes")
+	FGameplayAttributeData LaneSwitchSpeed;
+	ATTRIBUTE_ACCESSORS(USKAttributeSet, LaneSwitchSpeed);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxLaneSwitchSpeed, Category="Attributes")
+	FGameplayAttributeData MaxLaneSwitchSpeed;
+	ATTRIBUTE_ACCESSORS(USKAttributeSet, MaxLaneSwitchSpeed);
+
 	UFUNCTION()
 	virtual void OnRep_Health(const FGameplayAttributeData& OldValue);
 	
 	UFUNCTION()
 	virtual void OnRep_MaxHealth(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
+	virtual void OnRep_MoveSpeed(const FGameplayAttributeData& OldValue);
+	
+	UFUNCTION()
+	virtual void OnRep_MaxMoveSpeed(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
+	virtual void OnRep_LaneSwitchSpeed(const FGameplayAttributeData& OldValue);
+	
+	UFUNCTION()
+	virtual void OnRep_MaxLaneSwitchSpeed(const FGameplayAttributeData& OldValue);
 };

@@ -35,7 +35,7 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="GAS")
 	USKAbilitySystemComponent* AbilitySystemComponent;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
 	USKAttributeSet* Attributes;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="GAS")
@@ -85,7 +85,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Movement | Lane")
 	void ChangeLaneFinished();
 
-	// Late on move functions should probably be merged into 1 function
+	// Later on move functions should probably be merged into 1 function
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	void MoveRight();
 	
@@ -109,6 +109,34 @@ public:
 
 	virtual void HandleHealthChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnMoveSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+
+	virtual void HandleMoveSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnLaneSwitchSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+
+	virtual void HandleLaneSwitchSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetHealthAttribute();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetMaxHealthAttribute();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetMoveSpeedAttribute();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetMaxMoveSpeedAttribute();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetLaneSwitchSpeedAttribute();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetMaxLaneSwitchSpeedAttribute();
+	
 	friend USKAttributeSet;
 
 	// Sets default values for this character's properties

@@ -17,6 +17,10 @@ void USKAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 	DOREPLIFETIME(USKAttributeSet, Health);
 	DOREPLIFETIME(USKAttributeSet, MaxHealth);
+	DOREPLIFETIME(USKAttributeSet, MoveSpeed);
+	DOREPLIFETIME(USKAttributeSet, MaxMoveSpeed);
+	DOREPLIFETIME(USKAttributeSet, LaneSwitchSpeed);
+	DOREPLIFETIME(USKAttributeSet, MaxLaneSwitchSpeed);
 }
 
 void USKAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -26,6 +30,16 @@ void USKAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 	if(Attribute == GetMaxHealthAttribute())
 	{
 		AdjustAttributeForMaxChange(Health, MaxHealth, NewValue, GetHealthAttribute());
+	}
+	
+	if(Attribute == GetMaxMoveSpeedAttribute())
+	{
+		AdjustAttributeForMaxChange(MoveSpeed, MaxMoveSpeed, NewValue, GetMoveSpeedAttribute());
+	}
+	
+	if(Attribute == GetMaxLaneSwitchSpeedAttribute())
+	{
+		AdjustAttributeForMaxChange(LaneSwitchSpeed, MaxLaneSwitchSpeed, NewValue, GetLaneSwitchSpeedAttribute());
 	}
 }
 
@@ -62,6 +76,26 @@ void USKAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
 			TargetCharacter->HandleHealthChanged(DeltaValue, SourceTags);
 		}
 	}
+
+	if(Data.EvaluatedData.Attribute == GetMoveSpeedAttribute())
+	{
+		SetMoveSpeed(FMath::Clamp(GetMoveSpeed(), 0.0f, GetMaxMoveSpeed()));
+
+		if (TargetCharacter)
+		{
+			TargetCharacter->HandleMoveSpeedChanged(DeltaValue, SourceTags);
+		}
+	}
+
+	if(Data.EvaluatedData.Attribute == GetLaneSwitchSpeedAttribute())
+	{
+		SetLaneSwitchSpeed(FMath::Clamp(GetLaneSwitchSpeed(), 0.0f, GetMaxLaneSwitchSpeed()));
+
+		if (TargetCharacter)
+		{
+			TargetCharacter->HandleLaneSwitchSpeedChanged(DeltaValue, SourceTags);
+		}
+	}
 }
 
 void USKAttributeSet::AdjustAttributeForMaxChange(const FGameplayAttributeData& AffectedAttribute,
@@ -89,4 +123,24 @@ void USKAttributeSet::OnRep_Health(const FGameplayAttributeData& OldValue)
 void USKAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(USKAttributeSet, MaxHealth, OldValue);
+}
+
+void USKAttributeSet::OnRep_MoveSpeed(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USKAttributeSet, MoveSpeed, OldValue);
+}
+
+void USKAttributeSet::OnRep_MaxMoveSpeed(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USKAttributeSet, MaxMoveSpeed, OldValue);
+}
+
+void USKAttributeSet::OnRep_LaneSwitchSpeed(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USKAttributeSet, LaneSwitchSpeed, OldValue);
+}
+
+void USKAttributeSet::OnRep_MaxLaneSwitchSpeed(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(USKAttributeSet, MaxLaneSwitchSpeed, OldValue);
 }

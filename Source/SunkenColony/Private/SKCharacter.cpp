@@ -161,6 +161,81 @@ void ASKCharacter::HandleHealthChanged(float DeltaHealth, const FGameplayTagCont
 	}
 }
 
+void ASKCharacter::HandleMoveSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags)
+{
+	if (bAbilitiesInitialized)
+	{
+		OnMoveSpeedChanged(DeltaHealth, EventTags);
+	}
+}
+
+void ASKCharacter::HandleLaneSwitchSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags)
+{
+	if (bAbilitiesInitialized)
+	{
+		OnLaneSwitchSpeedChanged(DeltaHealth, EventTags);
+	}
+}
+
+float ASKCharacter::GetHealthAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetHealth();
+	}
+	return -1.f;
+}
+
+float ASKCharacter::GetMaxHealthAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetMaxHealth();
+	}
+	return -1.f;
+
+}
+
+float ASKCharacter::GetMoveSpeedAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetMoveSpeed();
+	}
+	return -1.f;
+
+}
+
+float ASKCharacter::GetMaxMoveSpeedAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetMaxMoveSpeed();
+	}
+	return -1.f;
+
+}
+
+float ASKCharacter::GetLaneSwitchSpeedAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetLaneSwitchSpeed();
+	}
+	return -1.f;
+
+}
+
+float ASKCharacter::GetMaxLaneSwitchSpeedAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetMaxLaneSwitchSpeed();
+	}
+	return -1.f;
+
+}
+
 ASKCharacter::ASKCharacter()
 {
 	bAbilitiesInitialized = false;
@@ -207,6 +282,7 @@ void ASKCharacter::PossessedBy(AController* NewController)
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+		AddStartupGamePlayAbilities();
 	}
 }
 
