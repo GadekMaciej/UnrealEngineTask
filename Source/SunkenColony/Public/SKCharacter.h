@@ -3,15 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/TimelineComponent.h"
+#include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
 #include "SKCharacter.generated.h"
 
 class UParticleSystem;
 class USoundBase;
+class UAbilitySystemComponent;
+class USKGameplayAbility;
+class USKAbilitySystemComponent;
+class USKAttributeSet;
+class UGameplayEffect;
 
 UCLASS(Abstract)
-class SUNKENCOLONY_API ASKCharacter : public ACharacter
+class SUNKENCOLONY_API ASKCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
@@ -26,6 +31,23 @@ class SUNKENCOLONY_API ASKCharacter : public ACharacter
 public:
 	virtual void Tick(float DeltaSeconds) override;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="GAS")
+	USKAbilitySystemComponent* AbilitySystemComponent;
+
+	UPROPERTY()
+	USKAttributeSet* Attributes;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="GAS")
+	TArray<TSubclassOf<UGameplayEffect>> PassiveGameplayEffects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="GAS")
+	TArray<TSubclassOf<USKGameplayAbility>> GameplayAbilities;
+
+	UPROPERTY()
+	uint8 bAbilitiesInitialized:1;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
 	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category="Movement | Lane")
 	int32 CurrentLane = 1;
 	
@@ -84,6 +106,8 @@ public:
 	
 	protected:
 	// APawn interface
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
 

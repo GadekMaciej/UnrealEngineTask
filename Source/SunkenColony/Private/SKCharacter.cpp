@@ -9,6 +9,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "AbilitySystemComponent.h"
+#include "SKAbilitySystemComponent.h"
+#include "SKAttributeSet.h"
+#include "SKData.h"
 
 void ASKCharacter::Tick(float DeltaSeconds)
 {
@@ -20,6 +24,11 @@ void ASKCharacter::Tick(float DeltaSeconds)
 		ControlRotator.Pitch = 0.0f;
 		AddMovementInput(ControlRotator.Vector());
 	}
+}
+
+UAbilitySystemComponent* ASKCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 void ASKCharacter::ChangeLane_Implementation()
@@ -112,6 +121,7 @@ void ASKCharacter::HandleHitDanger()
 
 ASKCharacter::ASKCharacter()
 {
+	bAbilitiesInitialized = false;
 	PrimaryActorTick.bCanEverTick = true;
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -138,16 +148,59 @@ ASKCharacter::ASKCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	AbilitySystemComponent = CreateDefaultSubobject<USKAbilitySystemComponent>("Ability System Component");
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+
+	Attributes = CreateDefaultSubobject<USKAttributeSet>("Attributes");
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Input
+void ASKCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	//server GAS init (server only)
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	}
+}
+
+void ASKCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	if (AbilitySystemComponent && InputComponent)
+	{
+		const FGameplayAbilityInputBinds Binds(
+			"Confirm",
+			"Cancel",
+			"SKAbilityInputID",
+			static_cast<int32>(SKAbilityInputID::Confirm),
+			static_cast<int32>(SKAbilityInputID::Confirm));
+
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, Binds);
+	}
+}
 
 void ASKCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (AbilitySystemComponent && InputComponent)
+	{
+		const FGameplayAbilityInputBinds Binds(
+			"Confirm",
+			"Cancel",
+			"SKAbilityInputID",
+			static_cast<int32>(SKAbilityInputID::Confirm),
+			static_cast<int32>(SKAbilityInputID::Confirm));
+
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, Binds);
+	}
 	
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
