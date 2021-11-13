@@ -51,12 +51,19 @@ void USKAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
 	UAbilitySystemComponent* Source = Context.GetOriginalInstigatorAbilitySystemComponent();
 	const FGameplayTagContainer& SourceTags = *Data.EffectSpec.CapturedSourceTags.GetAggregatedTags();
 
-	float DeltaValue = 0.0f;
+	float DeltaValue = -1.f;
+	float OverridenValue = -1.f;
 
 	if (Data.EvaluatedData.ModifierOp == EGameplayModOp::Type::Additive)
 	{
 		DeltaValue = Data.EvaluatedData.Magnitude;
 	}
+
+	if (Data.EvaluatedData.ModifierOp == EGameplayModOp::Type::Override)
+	{
+		OverridenValue = Data.EvaluatedData.Magnitude;
+	}
+	
 
 	ASKCharacter* TargetCharacter = nullptr;
 
@@ -83,7 +90,7 @@ void USKAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
 
 		if (TargetCharacter)
 		{
-			TargetCharacter->HandleMoveSpeedChanged(DeltaValue, SourceTags);
+			TargetCharacter->HandleMoveSpeedChanged(DeltaValue, OverridenValue, SourceTags);
 		}
 	}
 

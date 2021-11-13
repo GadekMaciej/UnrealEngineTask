@@ -14,6 +14,7 @@
 #include "SKAttributeSet.h"
 #include "SKData.h"
 #include "SKGameplayAbility.h"
+#include "SunkenColony/SunkenColony.h"
 
 void ASKCharacter::Tick(float DeltaSeconds)
 {
@@ -77,6 +78,7 @@ void ASKCharacter::AddStartupGamePlayAbilities()
 	check(AbilitySystemComponent)
 	if (GetLocalRole() == ROLE_Authority && !bAbilitiesInitialized)
 	{
+		bAbilitiesInitialized = true;
 		// Grant active abilities (only on the server)
 		for (TSubclassOf<USKGameplayAbility>& StartupAbility : GameplayAbilities)
 		{
@@ -101,7 +103,6 @@ void ASKCharacter::AddStartupGamePlayAbilities()
 					);
 			}
 		}
-		bAbilitiesInitialized = true;
 	}
 }
 
@@ -153,27 +154,36 @@ void ASKCharacter::HandleHitDanger()
 	HandleDeath();
 }
 
-void ASKCharacter::HandleHealthChanged(float DeltaHealth, const FGameplayTagContainer& EventTags)
+void ASKCharacter::HandleHealthChanged(float DeltaValue, const FGameplayTagContainer& EventTags)
 {
 	if (bAbilitiesInitialized)
 	{
-		OnHealthChanged(DeltaHealth, EventTags);
+		OnHealthChanged(DeltaValue, EventTags);
 	}
 }
 
-void ASKCharacter::HandleMoveSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags)
+void ASKCharacter::HandleMoveSpeedChanged(float DeltaValue, float OverrideValue, const FGameplayTagContainer& EventTags)
 {
 	if (bAbilitiesInitialized)
 	{
-		OnMoveSpeedChanged(DeltaHealth, EventTags);
+		if(!FMath::IsNearlyEqual(OverrideValue, -1.f))
+		{
+			GetCharacterMovement()->MaxWalkSpeed = OverrideValue;
+		}
+		if(!FMath::IsNearlyEqual(DeltaValue, -1.f))
+		{
+			GetCharacterMovement()->MaxWalkSpeed += DeltaValue;
+		}
+		
+		OnMoveSpeedChanged(DeltaValue, EventTags);
 	}
 }
 
-void ASKCharacter::HandleLaneSwitchSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags)
+void ASKCharacter::HandleLaneSwitchSpeedChanged(float DeltaValue, const FGameplayTagContainer& EventTags)
 {
 	if (bAbilitiesInitialized)
 	{
-		OnLaneSwitchSpeedChanged(DeltaHealth, EventTags);
+		OnLaneSwitchSpeedChanged(DeltaValue, EventTags);
 	}
 }
 
@@ -236,6 +246,21 @@ float ASKCharacter::GetMaxLaneSwitchSpeedAttribute()
 
 }
 
+void ASKCharacter::OnHealthAttributeModified(const FOnAttributeChangeData& Data)
+{
+	// TODO Health is not utilized as resource yet
+}
+
+void ASKCharacter::OnMoveSpeedAttributeModified(const FOnAttributeChangeData& Data)
+{
+	GetCharacterMovement()->MaxWalkSpeed = Data.NewValue;
+}
+
+void ASKCharacter::OnLaneSwitchSpeedAttributeModified(const FOnAttributeChangeData& Data)
+{
+	SwitchLaneTimeLineCPP->SetPlayRate(Data.NewValue);
+}
+
 ASKCharacter::ASKCharacter()
 {
 	bAbilitiesInitialized = false;
@@ -270,6 +295,11 @@ ASKCharacter::ASKCharacter()
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
 	Attributes = CreateDefaultSubobject<USKAttributeSet>("Attributes");
+
+	// GAS Attributes OnChanged Binds
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Attributes->GetHealthAttribute()).AddUObject(this, &ASKCharacter::OnHealthAttributeModified);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Attributes->GetMoveSpeedAttribute()).AddUObject(this, &ASKCharacter::OnMoveSpeedAttributeModified);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Attributes->GetLaneSwitchSpeedAttribute()).AddUObject(this, &ASKCharacter::OnLaneSwitchSpeedAttributeModified);
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)

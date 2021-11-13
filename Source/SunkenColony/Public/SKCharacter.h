@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayTagContainer.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "SKCharacter.generated.h"
 
@@ -15,6 +16,8 @@ class USKGameplayAbility;
 class USKAbilitySystemComponent;
 class USKAttributeSet;
 class UGameplayEffect;
+
+struct FOnAttributeChangeData;
 
 UCLASS(Abstract)
 class SUNKENCOLONY_API ASKCharacter : public ACharacter, public IAbilitySystemInterface
@@ -28,7 +31,7 @@ class SUNKENCOLONY_API ASKCharacter : public ACharacter, public IAbilitySystemIn
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
-	
+
 public:
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -75,6 +78,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Assets")
 	USoundBase* LaneSwitchSoundEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement | Lane")
+	UTimelineComponent* SwitchLaneTimeLineCPP;
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Movement | Lane")
 	void ChangeLane();
@@ -105,14 +111,14 @@ public:
 	void HandleHitDanger();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnHealthChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+	void OnHealthChanged(float DeltaValue, const FGameplayTagContainer& EventTags);
 
-	virtual void HandleHealthChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+	virtual void HandleHealthChanged(float DeltaValue, const FGameplayTagContainer& EventTags);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnMoveSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
 
-	virtual void HandleMoveSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+	virtual void HandleMoveSpeedChanged(float DeltaValue, float OverrideValue, const FGameplayTagContainer& EventTags);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnLaneSwitchSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
@@ -136,6 +142,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
 	float GetMaxLaneSwitchSpeedAttribute();
+
+	virtual void OnHealthAttributeModified(const FOnAttributeChangeData& Data);
+	virtual void OnMoveSpeedAttributeModified(const FOnAttributeChangeData& Data);
+	virtual void OnLaneSwitchSpeedAttributeModified(const FOnAttributeChangeData& Data);
 	
 	friend USKAttributeSet;
 
