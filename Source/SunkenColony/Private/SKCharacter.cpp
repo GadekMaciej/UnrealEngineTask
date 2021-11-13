@@ -13,6 +13,7 @@
 #include "SKAbilitySystemComponent.h"
 #include "SKAttributeSet.h"
 #include "SKData.h"
+#include "SKGameplayAbility.h"
 
 void ASKCharacter::Tick(float DeltaSeconds)
 {
@@ -71,6 +72,39 @@ void ASKCharacter::MoveLeft()
 	ChangeLane();
 }
 
+void ASKCharacter::AddStartupGamePlayAbilities()
+{
+	check(AbilitySystemComponent)
+	if (GetLocalRole() == ROLE_Authority && !bAbilitiesInitialized)
+	{
+		// Grant active abilities (only on the server)
+		for (TSubclassOf<USKGameplayAbility>& StartupAbility : GameplayAbilities)
+		{
+			AbilitySystemComponent->GiveAbility(
+				FGameplayAbilitySpec(StartupAbility, 1, static_cast<int32>(StartupAbility.GetDefaultObject()->AbilityInputID), this)
+				);
+		}
+
+		// Apply passive effects
+		for (const TSubclassOf<UGameplayEffect>& GameplayEffect : PassiveGameplayEffects)
+		{
+			FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+			EffectContext.AddSourceObject(this);
+
+			FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffect, 1, EffectContext);
+
+			if (NewHandle.IsValid())
+			{
+				FActiveGameplayEffectHandle ActiveGameplayEffectHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(
+					*NewHandle.Data.Get(),
+					AbilitySystemComponent
+					);
+			}
+		}
+		bAbilitiesInitialized = true;
+	}
+}
+
 void ASKCharacter::Jump()
 {
 	if (!bIsDead)
@@ -117,6 +151,14 @@ void ASKCharacter::HandleDeath()
 void ASKCharacter::HandleHitDanger()
 {
 	HandleDeath();
+}
+
+void ASKCharacter::HandleHealthChanged(float DeltaHealth, const FGameplayTagContainer& EventTags)
+{
+	if (bAbilitiesInitialized)
+	{
+		OnHealthChanged(DeltaHealth, EventTags);
+	}
 }
 
 ASKCharacter::ASKCharacter()

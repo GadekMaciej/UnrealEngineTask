@@ -25,11 +25,26 @@ class SUNKENCOLONY_API USKAttributeSet : public UAttributeSet
 	USKAttributeSet();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
+
+	void AdjustAttributeForMaxChange(
+		const FGameplayAttributeData& AffectedAttribute,
+		const FGameplayAttributeData& MaxAttribute,
+		float NewMaxValue,
+		const FGameplayAttribute& EffectedAttributeProperty) const;
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category="Attributes")
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS(USKAttributeSet, Health);
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category="Attributes")
+	FGameplayAttributeData MaxHealth;
+	ATTRIBUTE_ACCESSORS(USKAttributeSet, MaxHealth);
+
 	UFUNCTION()
 	virtual void OnRep_Health(const FGameplayAttributeData& OldValue);
+	
+	UFUNCTION()
+	virtual void OnRep_MaxHealth(const FGameplayAttributeData& OldValue);
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
 #include "SKCharacter.generated.h"
 
@@ -90,6 +91,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	void MoveLeft();
+
+	void AddStartupGamePlayAbilities();
 	
 	virtual void Jump() override;
 	
@@ -100,6 +103,13 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void HandleHitDanger();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHealthChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+
+	virtual void HandleHealthChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+
+	friend USKAttributeSet;
 
 	// Sets default values for this character's properties
 	ASKCharacter();
