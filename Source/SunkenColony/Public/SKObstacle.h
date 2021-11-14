@@ -24,7 +24,7 @@ protected:
 	// ******************************************
 	// ******** Editor Exposed Properties *******
 	// ******************************************
-private:
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	USceneComponent* SceneComponent;
 

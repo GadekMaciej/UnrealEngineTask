@@ -26,7 +26,7 @@ protected:
 	// ******************************************
 	// ******** Editor Exposed Properties *******
 	// ******************************************
-private:
+public:
 	// Initial floor tiles are blank. There are no obstacles nor powerups
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="EndlessRunner | Tiles")
 	int32 NumOfInitFloorTiles = 8;
@@ -95,8 +95,10 @@ public:
 	// ~~~~~~~~~~ Blueprint Callables ~~~~~~~~~~
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	private:
+public:
 	FTimerHandle LevelRestartTimerHandle;
+	
+private:
 	void GetLaneCoordinates();
 	TSubclassOf<ASKTileBase> RandomizeTileType();
 };

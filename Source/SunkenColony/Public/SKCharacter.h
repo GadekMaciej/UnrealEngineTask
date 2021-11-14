@@ -47,7 +47,7 @@ protected:
 	// ******** Editor Exposed Properties *******
 	// ******************************************
 	
-private:
+public:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components | Camera")
 	class USpringArmComponent* CameraBoom;
@@ -67,7 +67,7 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Assets")
 	USoundBase* LaneSwitchSoundEffect;
-
+	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="GAS")
 	USKAbilitySystemComponent* AbilitySystemComponent;
 

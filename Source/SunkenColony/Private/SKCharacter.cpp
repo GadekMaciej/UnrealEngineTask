@@ -267,16 +267,7 @@ void ASKCharacter::HandleHealthChanged(float DeltaValue, const FGameplayTagConta
 void ASKCharacter::HandleMoveSpeedChanged(float DeltaValue, float OverrideValue, const FGameplayTagContainer& EventTags)
 {
 	if (bAbilitiesInitialized)
-	{
-		if(!FMath::IsNearlyEqual(OverrideValue, -1.f))
-		{
-			GetCharacterMovement()->MaxWalkSpeed = OverrideValue;
-		}
-		if(!FMath::IsNearlyEqual(DeltaValue, -1.f))
-		{
-			GetCharacterMovement()->MaxWalkSpeed += DeltaValue;
-		}
-		
+	{		
 		OnMoveSpeedChanged(DeltaValue, EventTags);
 	}
 }
