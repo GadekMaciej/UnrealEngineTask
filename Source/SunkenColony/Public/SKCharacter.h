@@ -22,6 +22,8 @@ struct FOnAttributeChangeData;
 /**
 * Player Character base class 
 * Handles basic input, uses UcharacterMovementComponent and AbilitySystemComponent
+* TODO add variable to optionally disable changing lane during jump
+* TODO Switch to proper Health system instead of 1 hit KO
 */ 
 UCLASS(Abstract)
 class SUNKENCOLONY_API ASKCharacter : public ACharacter, public IAbilitySystemInterface
@@ -41,7 +43,11 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
 	
-private:	
+	// ******************************************
+	// ******** Editor Exposed Properties *******
+	// ******************************************
+	
+private:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components | Camera")
 	class USpringArmComponent* CameraBoom;
@@ -50,24 +56,25 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components | Camera")
 	class UCameraComponent* FollowCamera;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), BlueprintReadWrite, Category="Assets")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Assets")
 	UParticleSystem* DeathParticleSystem;
 	
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), BlueprintReadWrite, Category="Assets")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Assets")
 	USoundBase* DeathSoundEffect;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), BlueprintReadWrite, Category="Assets")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Assets")
 	UParticleSystem* LaneSwitchParticleSystem;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), BlueprintReadWrite, Category="Assets")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Assets")
 	USoundBase* LaneSwitchSoundEffect;
 
-	UPROPERTY(VisibleDefaultsOnly, meta = (AllowPrivateAccess = "true"), BlueprintReadOnly, Category="GAS")
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="GAS")
 	USKAbilitySystemComponent* AbilitySystemComponent;
 
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"), BlueprintReadOnly, Category="GAS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="GAS")
 	USKAttributeSet* Attributes;
 
+	// Passive Effects that will be applied to this pawn on BeginPlay()
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"), Category="GAS")
 	TArray<TSubclassOf<UGameplayEffect>> PassiveGameplayEffects;
 
@@ -77,11 +84,15 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category="Movement | Lane")
 	UTimelineComponent* SwitchLaneTimeLineCPP;
 	
-	UPROPERTY(Transient, VisibleInstanceOnly, meta=(AllowPrivateAccess = "true"), BlueprintReadOnly, Category="Movement | Lane")
+	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"), Category="Movement | Lane")
 	int32 CurrentLane = 1;
 	
-	UPROPERTY(Transient, VisibleInstanceOnly, meta=(AllowPrivateAccess = "true"), BlueprintReadOnly, Category="Movement | Lane")
+	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"), Category="Movement | Lane")
 	int32 NextLane = 0;
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~ Editor Exposed Properties ~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 public:	
 	// ******************************************
@@ -91,18 +102,18 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Movement | Lane")
 	void ChangeLane();
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, Category="Attributes")
 	void OnHealthChanged(float DeltaValue, const FGameplayTagContainer& EventTags);
 	
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, Category="Attributes")
 	void OnMoveSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
 	
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, Category="Attributes")
 	void OnLaneSwitchSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
 	
-	// ******************************************
-	// ********** Blueprint Events End **********
-	// ******************************************
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~~~ Blueprint Events ~~~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	// *****************************************
 	// ********** Blueprint Callables **********
@@ -120,8 +131,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	void MoveLeft();
-
-	// TODO Switch to proper Health system instead of 1 hit KO
+	
 	UFUNCTION(BlueprintCallable)
 	void HandleDeath();
 	
@@ -147,9 +157,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
 	float GetMaxLaneSwitchSpeedAttribute();
 	
-	// *****************************************
-	// ******** Blueprint Callables End ********
-	// *****************************************
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~ Blueprint Callables ~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	
 	// *****************************************
 	// ******** Gameplay Ability System ********
@@ -175,9 +185,9 @@ public:
 	// Epic's Interface Override
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
-	// *****************************************
-	// ****** Gameplay Ability System End ******
-	// *****************************************
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~ Gameplay Ability System End ~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Debug")
 	bool bIsDead = false;

@@ -17,55 +17,80 @@ class SUNKENCOLONY_API ASKTileBase : public AActor
 	
 public:	
 	ASKTileBase();
+	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+protected:
+	virtual void BeginPlay() override;
+
+	// ******************************************
+	// ******** Editor Exposed Properties *******
+	// ******************************************
+private:	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	USceneComponent* SceneComponent;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	UStaticMeshComponent* FloorStaticMesh;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	UBoxComponent* CollisionBoxEnd;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	UBoxComponent* CollisionBoxBegin;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	UArrowComponent* NextTileAttachPoint;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	UArrowComponent* PreviousTileAttachPoint;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	UArrowComponent* LaneA;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	UArrowComponent* LaneB;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	UArrowComponent* LaneC;
-
-	UPROPERTY()
-	FTimerHandle DestroyTimerHandle;
 	
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~ Editor Exposed Properties ~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	// ******************************************
+	// ************ Blueprint Events ************
+	// ******************************************
+public:
 	UFUNCTION(BlueprintNativeEvent)
 	void OnEnteringTile(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
 	UFUNCTION(BlueprintNativeEvent)
 	void OnExitingTile(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~~~ Blueprint Events ~~~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	// *****************************************
+	// ********** Blueprint Callables **********
+	// *****************************************
 	
 	UFUNCTION(BlueprintCallable)
 	void HandleDestroyFloorTile();
 	
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~ Blueprint Callables ~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+public:	
 	FORCEINLINE const FTransform& GetNextTileAttachTransform() const
 	{
 		return NextTileAttachPoint->GetComponentTransform();
 	}
-	
-protected:
-	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	
+private:
+	UPROPERTY()
+	FTimerHandle DestroyTimerHandle;
 };

@@ -17,6 +17,13 @@ ASKObstacle::ASKObstacle()
 	StaticMesh->OnComponentHit.AddDynamic(this, &ASKObstacle::OnObstacleHit);
 }
 
+// Called when the game starts or when spawned
+void ASKObstacle::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
 void ASKObstacle::OnObstacleHit_Implementation(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
@@ -26,13 +33,3 @@ void ASKObstacle::OnObstacleHit_Implementation(UPrimitiveComponent* HitComponent
 		PlayerCharacter->HandleHitDanger();
 	}
 }
-
-// Called when the game starts or when spawned
-void ASKObstacle::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-
-

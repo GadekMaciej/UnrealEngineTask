@@ -20,56 +20,83 @@ class SUNKENCOLONY_API ASKEndlessRunnerGM : public AGameModeBase
 public:
 	ASKEndlessRunnerGM();
 
-	// Initial floor tiles are blank. There are no obstacles nor powerups.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="EndlessRunner | Tiles")
+protected:
+	virtual void BeginPlay() override;
+
+	// ******************************************
+	// ******** Editor Exposed Properties *******
+	// ******************************************
+private:
+	// Initial floor tiles are blank. There are no obstacles nor powerups
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="EndlessRunner | Tiles")
 	int32 NumOfInitFloorTiles = 8;
 	
-	// Time until tile is completely destroyed, starts after character passes tile end.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="EndlessRunner | Tiles")
+	// Time until tile is completely destroyed, starts after character passes tile end
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="EndlessRunner | Tiles")
 	float TileLingerTime = 4.0f;
 
 	// Tile class that will be used as initial tiles.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="EndlessRunner | Tiles")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="EndlessRunner | Tiles")
 	TSubclassOf<ASKTileBase> DefaultTileClass;
 	
-	// An Array of tile classes that will be generated in endless loop. For now they all have the same priority.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="EndlessRunner | Tiles")
+	// An Array of tile classes that will be generated in endless loop. For now they all have the same priority
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="EndlessRunner | Tiles")
 	TArray<TSubclassOf<ASKTileBase>> TypesOfTilesGenerated;
 	
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="EndlessRunner | Debug")
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="EndlessRunner | Debug")
 	FTransform NextTileSpawnPoint;
-	
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="EndlessRunner | Debug")
-	TArray<float> LaneLocationsOffset;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="EndlessRunner | Game")
-	// Time That the game will wait after player lost all lifes.
+	// all 3 Lane X coordinates, Character only moves along X axis so its all we need
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="EndlessRunner | Debug")
+	TArray<float> LaneLocationsOffset;
+	
+	// Time That the game will wait after player lost all lifes
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="EndlessRunner | Game")
 	float GameOverLingerTimer = 4.0f;
 
-	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, Category="EndlessRunner | Game")
+	// Player score, various pickups can increase it
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="EndlessRunner | Game")
 	int32 PlayerScore = 0;
+	
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~ Editor Exposed Properties ~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+	// ******************************************
+	// ************ Blueprint Events ************
+	// ******************************************
+public:
+	
 	UPROPERTY(BlueprintAssignable, Category="Events")
 	FPlayerScoreChanged PlayerScoreChanged;
-	
-	FTimerHandle LevelRestartTimerHandle;
 	
 	UFUNCTION(BlueprintNativeEvent, Category="Tiles")
 	void CreateInitialFloorTiles();
 	
-	UFUNCTION(BlueprintCallable, Category="Tiles")
-	ASKTileBase* AddFloorTile(const bool bUseDefaultFloorTile = false);
-
 	UFUNCTION(BlueprintNativeEvent, Category="Game")
 	void HandleGameOver();
 
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~~~ Blueprint Events ~~~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+	// *****************************************
+	// ********** Blueprint Callables **********
+	// *****************************************
+	
+	UFUNCTION(BlueprintCallable, Category="Tiles")
+	ASKTileBase* AddFloorTile(const bool bUseDefaultFloorTile = false);
+
 	UFUNCTION(BlueprintCallable, Category="Game")
 	void ModifyPlayerScore(int32 Value);
-
-	protected:
-	virtual void BeginPlay() override;
+	
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~ Blueprint Callables ~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	private:
+	FTimerHandle LevelRestartTimerHandle;
 	void GetLaneCoordinates();
 	TSubclassOf<ASKTileBase> RandomizeTileType();
 };

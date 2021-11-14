@@ -17,21 +17,32 @@ class SUNKENCOLONY_API ASKObstacle : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ASKObstacle();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	USceneComponent* SceneComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	UStaticMeshComponent* StaticMesh;
-
-	UFUNCTION(BlueprintNativeEvent, Category="Events")
-	void OnObstacleHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	// ******************************************
+	// ******** Editor Exposed Properties *******
+	// ******************************************
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
+	USceneComponent* SceneComponent;
 
-public:	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
+	UStaticMeshComponent* StaticMesh;
+	
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~ Editor Exposed Properties ~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
+	// ******************************************
+	// ************ Blueprint Events ************
+	// ******************************************
+public:
+	UFUNCTION(BlueprintNativeEvent, Category="Events")
+	void OnObstacleHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~~~ Blueprint Events ~~~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 };

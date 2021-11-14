@@ -36,6 +36,10 @@ void ASKCollectibleBase::OnSphereColliderOverlap(UPrimitiveComponent* Overlapped
 		if(GetActorLocation().Z + HeightDifferenceRequiredForJumpedOn < OtherActor->GetActorLocation().Z)
 		{
 			OnJumpedOnTop(Character);
+			if(bOnJumpedOnTopCallsOnCollected)
+			{
+				OnCollected(Character);
+			}
 		}
 		else
 		{
