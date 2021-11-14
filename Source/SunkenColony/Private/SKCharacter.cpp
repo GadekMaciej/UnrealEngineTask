@@ -9,6 +9,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "AbilitySystemComponent.h"
+#include "SKAbilitySystemComponent.h"
+#include "SKAttributeSet.h"
+#include "SKData.h"
+#include "SKGameplayAbility.h"
+#include "SunkenColony/SunkenColony.h"
 
 void ASKCharacter::Tick(float DeltaSeconds)
 {
@@ -20,6 +26,11 @@ void ASKCharacter::Tick(float DeltaSeconds)
 		ControlRotator.Pitch = 0.0f;
 		AddMovementInput(ControlRotator.Vector());
 	}
+}
+
+UAbilitySystemComponent* ASKCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 void ASKCharacter::ChangeLane_Implementation()
@@ -60,6 +71,39 @@ void ASKCharacter::MoveLeft()
 {
 	NextLane = FMath::Clamp(CurrentLane - 1, 0, 2);
 	ChangeLane();
+}
+
+void ASKCharacter::AddStartupGamePlayAbilities()
+{
+	check(AbilitySystemComponent)
+	if (GetLocalRole() == ROLE_Authority && !bAbilitiesInitialized)
+	{
+		bAbilitiesInitialized = true;
+		// Grant active abilities (only on the server)
+		for (TSubclassOf<USKGameplayAbility>& StartupAbility : GameplayAbilities)
+		{
+			AbilitySystemComponent->GiveAbility(
+				FGameplayAbilitySpec(StartupAbility, 1, static_cast<int32>(StartupAbility.GetDefaultObject()->AbilityInputID), this)
+				);
+		}
+
+		// Apply passive effects
+		for (const TSubclassOf<UGameplayEffect>& GameplayEffect : PassiveGameplayEffects)
+		{
+			FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+			EffectContext.AddSourceObject(this);
+
+			FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(GameplayEffect, 1, EffectContext);
+
+			if (NewHandle.IsValid())
+			{
+				FActiveGameplayEffectHandle ActiveGameplayEffectHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(
+					*NewHandle.Data.Get(),
+					AbilitySystemComponent
+					);
+			}
+		}
+	}
 }
 
 void ASKCharacter::Jump()
@@ -110,8 +154,116 @@ void ASKCharacter::HandleHitDanger()
 	HandleDeath();
 }
 
+void ASKCharacter::HandleHealthChanged(float DeltaValue, const FGameplayTagContainer& EventTags)
+{
+	if (bAbilitiesInitialized)
+	{
+		OnHealthChanged(DeltaValue, EventTags);
+	}
+}
+
+void ASKCharacter::HandleMoveSpeedChanged(float DeltaValue, float OverrideValue, const FGameplayTagContainer& EventTags)
+{
+	if (bAbilitiesInitialized)
+	{
+		if(!FMath::IsNearlyEqual(OverrideValue, -1.f))
+		{
+			GetCharacterMovement()->MaxWalkSpeed = OverrideValue;
+		}
+		if(!FMath::IsNearlyEqual(DeltaValue, -1.f))
+		{
+			GetCharacterMovement()->MaxWalkSpeed += DeltaValue;
+		}
+		
+		OnMoveSpeedChanged(DeltaValue, EventTags);
+	}
+}
+
+void ASKCharacter::HandleLaneSwitchSpeedChanged(float DeltaValue, const FGameplayTagContainer& EventTags)
+{
+	if (bAbilitiesInitialized)
+	{
+		OnLaneSwitchSpeedChanged(DeltaValue, EventTags);
+	}
+}
+
+float ASKCharacter::GetHealthAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetHealth();
+	}
+	return -1.f;
+}
+
+float ASKCharacter::GetMaxHealthAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetMaxHealth();
+	}
+	return -1.f;
+
+}
+
+float ASKCharacter::GetMoveSpeedAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetMoveSpeed();
+	}
+	return -1.f;
+
+}
+
+float ASKCharacter::GetMaxMoveSpeedAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetMaxMoveSpeed();
+	}
+	return -1.f;
+
+}
+
+float ASKCharacter::GetLaneSwitchSpeedAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetLaneSwitchSpeed();
+	}
+	return -1.f;
+
+}
+
+float ASKCharacter::GetMaxLaneSwitchSpeedAttribute()
+{
+	if (Attributes)
+	{
+		return Attributes->GetMaxLaneSwitchSpeed();
+	}
+	return -1.f;
+
+}
+
+void ASKCharacter::OnHealthAttributeModified(const FOnAttributeChangeData& Data)
+{
+	// TODO Health is not utilized as resource yet
+}
+
+void ASKCharacter::OnMoveSpeedAttributeModified(const FOnAttributeChangeData& Data)
+{
+	GetCharacterMovement()->MaxWalkSpeed = Data.NewValue;
+}
+
+void ASKCharacter::OnLaneSwitchSpeedAttributeModified(const FOnAttributeChangeData& Data)
+{
+	SwitchLaneTimeLineCPP->SetPlayRate(Data.NewValue);
+}
+
 ASKCharacter::ASKCharacter()
 {
+	bAbilitiesInitialized = false;
 	PrimaryActorTick.bCanEverTick = true;
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -138,16 +290,65 @@ ASKCharacter::ASKCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	AbilitySystemComponent = CreateDefaultSubobject<USKAbilitySystemComponent>("Ability System Component");
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+
+	Attributes = CreateDefaultSubobject<USKAttributeSet>("Attributes");
+
+	// GAS Attributes OnChanged Binds
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Attributes->GetHealthAttribute()).AddUObject(this, &ASKCharacter::OnHealthAttributeModified);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Attributes->GetMoveSpeedAttribute()).AddUObject(this, &ASKCharacter::OnMoveSpeedAttributeModified);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Attributes->GetLaneSwitchSpeedAttribute()).AddUObject(this, &ASKCharacter::OnLaneSwitchSpeedAttributeModified);
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Input
+void ASKCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	//server GAS init (server only)
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+		AddStartupGamePlayAbilities();
+	}
+}
+
+void ASKCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	if (AbilitySystemComponent && InputComponent)
+	{
+		const FGameplayAbilityInputBinds Binds(
+			"Confirm",
+			"Cancel",
+			"SKAbilityInputID",
+			static_cast<int32>(SKAbilityInputID::Confirm),
+			static_cast<int32>(SKAbilityInputID::Confirm));
+
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, Binds);
+	}
+}
 
 void ASKCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (AbilitySystemComponent && InputComponent)
+	{
+		const FGameplayAbilityInputBinds Binds(
+			"Confirm",
+			"Cancel",
+			"SKAbilityInputID",
+			static_cast<int32>(SKAbilityInputID::Confirm),
+			static_cast<int32>(SKAbilityInputID::Confirm));
+
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, Binds);
+	}
 	
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);

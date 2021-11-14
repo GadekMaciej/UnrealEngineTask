@@ -3,15 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayTagContainer.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "SKCharacter.generated.h"
 
 class UParticleSystem;
 class USoundBase;
+class UAbilitySystemComponent;
+class USKGameplayAbility;
+class USKAbilitySystemComponent;
+class USKAttributeSet;
+class UGameplayEffect;
+
+struct FOnAttributeChangeData;
 
 UCLASS(Abstract)
-class SUNKENCOLONY_API ASKCharacter : public ACharacter
+class SUNKENCOLONY_API ASKCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
@@ -22,10 +31,27 @@ class SUNKENCOLONY_API ASKCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
-	
+
 public:
 	virtual void Tick(float DeltaSeconds) override;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="GAS")
+	USKAbilitySystemComponent* AbilitySystemComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
+	USKAttributeSet* Attributes;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="GAS")
+	TArray<TSubclassOf<UGameplayEffect>> PassiveGameplayEffects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="GAS")
+	TArray<TSubclassOf<USKGameplayAbility>> GameplayAbilities;
+
+	UPROPERTY()
+	uint8 bAbilitiesInitialized:1;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
 	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category="Movement | Lane")
 	int32 CurrentLane = 1;
 	
@@ -52,6 +78,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Assets")
 	USoundBase* LaneSwitchSoundEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement | Lane")
+	UTimelineComponent* SwitchLaneTimeLineCPP;
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Movement | Lane")
 	void ChangeLane();
@@ -62,12 +91,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Movement | Lane")
 	void ChangeLaneFinished();
 
-	// Late on move functions should probably be merged into 1 function
+	// Later on move functions should probably be merged into 1 function
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	void MoveRight();
 	
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	void MoveLeft();
+
+	void AddStartupGamePlayAbilities();
 	
 	virtual void Jump() override;
 	
@@ -79,11 +110,52 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void HandleHitDanger();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHealthChanged(float DeltaValue, const FGameplayTagContainer& EventTags);
+
+	virtual void HandleHealthChanged(float DeltaValue, const FGameplayTagContainer& EventTags);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnMoveSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+
+	virtual void HandleMoveSpeedChanged(float DeltaValue, float OverrideValue, const FGameplayTagContainer& EventTags);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnLaneSwitchSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+
+	virtual void HandleLaneSwitchSpeedChanged(float DeltaHealth, const FGameplayTagContainer& EventTags);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetHealthAttribute();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetMaxHealthAttribute();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetMoveSpeedAttribute();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetMaxMoveSpeedAttribute();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetLaneSwitchSpeedAttribute();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Attributes")
+	float GetMaxLaneSwitchSpeedAttribute();
+
+	virtual void OnHealthAttributeModified(const FOnAttributeChangeData& Data);
+	virtual void OnMoveSpeedAttributeModified(const FOnAttributeChangeData& Data);
+	virtual void OnLaneSwitchSpeedAttributeModified(const FOnAttributeChangeData& Data);
+	
+	friend USKAttributeSet;
+
 	// Sets default values for this character's properties
 	ASKCharacter();
 	
 	protected:
 	// APawn interface
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
 
