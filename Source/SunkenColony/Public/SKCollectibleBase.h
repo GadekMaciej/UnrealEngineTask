@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "SKCharacter.h"
 #include "Components/SphereComponent.h"
-#include "Components/TimelineComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/RotatingMovementComponent.h"
 #include "SKCollectibleBase.generated.h"
