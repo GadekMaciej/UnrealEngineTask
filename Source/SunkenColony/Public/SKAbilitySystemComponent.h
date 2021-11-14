@@ -7,7 +7,7 @@
 #include "SKAbilitySystemComponent.generated.h"
 
 /**
- * 
+ * Custom Ability System Component class
  */
 UCLASS()
 class SUNKENCOLONY_API USKAbilitySystemComponent : public UAbilitySystemComponent

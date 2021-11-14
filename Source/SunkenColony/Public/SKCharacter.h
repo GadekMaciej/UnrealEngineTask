@@ -19,6 +19,10 @@ class UGameplayEffect;
 
 struct FOnAttributeChangeData;
 
+/**
+* Player Character base class 
+* Handles basic input, uses UcharacterMovementComponent and AbilitySystemComponent
+*/ 
 UCLASS(Abstract)
 class SUNKENCOLONY_API ASKCharacter : public ACharacter, public IAbilitySystemInterface
 {
