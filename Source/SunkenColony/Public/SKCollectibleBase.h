@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "SKCharacter.h"
 #include "Components/SphereComponent.h"
-#include "Components/TimelineComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/RotatingMovementComponent.h"
 #include "SKCollectibleBase.generated.h"
@@ -25,33 +24,56 @@ class SUNKENCOLONY_API ASKCollectibleBase : public AActor
 public:	
 	ASKCollectibleBase();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	// ******************************************
+	// ******** Editor Exposed Properties *******
+	// ******************************************
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	USceneComponent* SceneComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Components")
 	UStaticMeshComponent* StaticMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	USphereComponent* SphereCollider;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Components")
 	URotatingMovementComponent* RotatingMovementComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Assets")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Assets")
 	USoundBase* OnCollectSound;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="settings")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Assets")
+	USoundBase* OnJumpedOnTopSound;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="settings")
 	int32 ScoreValue;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="settings")
+	bool bOnJumpedOnTopCallsOnCollected = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Settings")
 	float HeightDifferenceRequiredForJumpedOn = 50.0f;
 	
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~ Editor Exposed Properties ~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	// ******************************************
+	// ************ Blueprint Events ************
+	// ******************************************
+public:	
 	// called when player collects this collectible
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="Events")
 	void OnCollected(ASKCharacter* PlayerCharacter);
 	// called when player jumps on top of this collectible
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category="Events")
 	void OnJumpedOnTop(ASKCharacter* PlayerCharacter);
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~~~ Blueprint Events ~~~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 	
 	// calls OnCollected() Event;
 	UFUNCTION()

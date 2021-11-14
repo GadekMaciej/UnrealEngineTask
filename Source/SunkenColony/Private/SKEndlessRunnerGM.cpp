@@ -11,6 +11,12 @@ ASKEndlessRunnerGM::ASKEndlessRunnerGM()
 	
 }
 
+void ASKEndlessRunnerGM::BeginPlay()
+{
+	Super::BeginPlay();
+	CreateInitialFloorTiles();
+}
+
 void ASKEndlessRunnerGM::CreateInitialFloorTiles_Implementation()
 {
 	// this function creates 1 additional tile, just something to fix later
@@ -20,6 +26,15 @@ void ASKEndlessRunnerGM::CreateInitialFloorTiles_Implementation()
 		AddFloorTile(true);
 	}
 	UE_LOG(SunkenColony, Log, TEXT("Created Initial Tiles"));
+}
+
+void ASKEndlessRunnerGM::HandleGameOver_Implementation()
+{
+	if (LevelRestartTimerHandle.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(LevelRestartTimerHandle);
+	}
+	UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("RestartLevel"));
 }
 
 ASKTileBase* ASKEndlessRunnerGM::AddFloorTile(const bool bUseDefaultFloorTile)
@@ -53,19 +68,10 @@ ASKTileBase* ASKEndlessRunnerGM::AddFloorTile(const bool bUseDefaultFloorTile)
 	return NewTile;
 }
 
-void ASKEndlessRunnerGM::HandleGameOver_Implementation()
+void ASKEndlessRunnerGM::ModifyPlayerScore(int32 Value)
 {
-	if (LevelRestartTimerHandle.IsValid())
-	{
-		GetWorldTimerManager().ClearTimer(LevelRestartTimerHandle);
-	}
-	UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("RestartLevel"));
-}
-
-void ASKEndlessRunnerGM::BeginPlay()
-{
-	Super::BeginPlay();
-	CreateInitialFloorTiles();
+	PlayerScore += Value;
+	PlayerScoreChanged.Broadcast(PlayerScore, Value);
 }
 
 void ASKEndlessRunnerGM::GetLaneCoordinates()
@@ -94,8 +100,3 @@ TSubclassOf<ASKTileBase> ASKEndlessRunnerGM::RandomizeTileType()
 	return TypesOfTilesGenerated[RandomIndex];
 }
 
-void ASKEndlessRunnerGM::ModifyPlayerScore(int32 Value)
-{
-	PlayerScore += Value;
-	PlayerScoreChanged.Broadcast(PlayerScore, Value);
-}

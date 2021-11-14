@@ -7,6 +7,7 @@
 #include "SCLevelScriptActorMainMenu.generated.h"
 
 /**
+ * Main Menu Level blueprint base class, just in case I needed to reference something in c++
  * 
  */
 UCLASS()

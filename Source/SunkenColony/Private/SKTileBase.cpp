@@ -41,6 +41,22 @@ ASKTileBase::ASKTileBase()
 	CollisionBoxEnd->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
 }
 
+// Called every frame
+void ASKTileBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+// Called when the game starts or when spawned
+void ASKTileBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CollisionBoxBegin->OnComponentBeginOverlap.AddDynamic(this, &ASKTileBase::OnEnteringTile);
+	CollisionBoxEnd->OnComponentBeginOverlap.AddDynamic(this, &ASKTileBase::OnExitingTile);
+}
+
 void ASKTileBase::OnEnteringTile_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -69,20 +85,3 @@ void ASKTileBase::HandleDestroyFloorTile()
 	}
 	this->Destroy();
 }
-
-// Called when the game starts or when spawned
-void ASKTileBase::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CollisionBoxBegin->OnComponentBeginOverlap.AddDynamic(this, &ASKTileBase::OnEnteringTile);
-	CollisionBoxEnd->OnComponentBeginOverlap.AddDynamic(this, &ASKTileBase::OnExitingTile);
-}
-
-// Called every frame
-void ASKTileBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
